@@ -1,32 +1,41 @@
-
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>人資加班與休假管理系統</title>
+    <title>加班與休假管理系統</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #6366f1;
-            --primary-dark: #4f46e5;
-            --secondary: #ec4899;
+            --primary: #5b8dee;
+            --primary-dark: #3b6fd4;
+            --secondary: #94a3b8;
             --accent: #f59e0b;
-            --success: #10b981;
+            --success: #22c55e;
             --danger: #ef4444;
-            --warning: #f59e0b;
-            --info: #06b6d4;
+            --warning: #f97316;
+            --info: #38bdf8;
             
             --bg-main: #0f172a;
             --bg-card: #1e293b;
-            --bg-elevated: #334155;
+            --bg-elevated: #2d3f55;
             
-            --text-primary: #f1f5f9;
-            --text-secondary: #cbd5e1;
-            --text-muted: #64748b;
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --text-muted: #475569;
             
-            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --gradient-card: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            /* 功能性顏色 - 直覺識別用 */
+            --ot-color: #f97316;          /* 有加班：橙色 - 醒目但不刺眼 */
+            --ot-border: #ea6a08;
+            --reported-color: #22c55e;    /* 已申報：綠色 - 完成感 */
+            --reported-border: #16a34a;
+            --leave-color: #38bdf8;       /* 有請假：天藍色 */
+            --leave-border: #0284c7;
+            --weekend-color: #334155;     /* 週末：深灰藍 */
+            --holiday-color: #854d0e;     /* 假日：深琥珀 */
+            
+            --gradient-primary: linear-gradient(135deg, #3b6fd4 0%, #5b8dee 100%);
+            --gradient-card: linear-gradient(135deg, #1e293b 0%, #263347 100%);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -45,9 +54,8 @@
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
             background: 
-                radial-gradient(circle at 20% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(236, 72, 153, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 50% 50%, rgba(245, 158, 11, 0.1) 0%, transparent 50%);
+                radial-gradient(circle at 20% 20%, rgba(91, 141, 238, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(34, 197, 94, 0.05) 0%, transparent 50%);
             pointer-events: none;
             z-index: 0;
         }
@@ -199,40 +207,40 @@
         .day-number { font-size: 20px; font-weight: 700; color: var(--text-primary); margin-bottom: auto; position: relative; z-index: 1; }
 
         /* 週末 */
-        .day-rest { background: linear-gradient(135deg, rgba(236, 72, 153, 0.15) 0%, rgba(236, 72, 153, 0.05) 100%); border-color: rgba(236, 72, 153, 0.2); }
-        .rest-badge { position: absolute; top: 12px; right: 12px; background: rgba(236, 72, 153, 0.9); color: white; font-size: 10px; font-weight: 700; padding: 4px 8px; border-radius: 6px; z-index: 2; }
+        .day-rest { background: linear-gradient(135deg, rgba(51, 65, 85, 0.6) 0%, rgba(51, 65, 85, 0.3) 100%); border-color: rgba(71, 85, 105, 0.4); }
+        .rest-badge { position: absolute; top: 12px; right: 12px; background: rgba(71, 85, 105, 0.9); color: #cbd5e1; font-size: 10px; font-weight: 700; padding: 4px 8px; border-radius: 6px; z-index: 2; }
 
         /* 國定假日 */
-        .day-national-holiday { background: linear-gradient(135deg, rgba(245, 158, 11, 0.25) 0%, rgba(245, 158, 11, 0.1) 100%); border-color: rgba(245, 158, 11, 0.4); }
-        .holiday-badge { position: absolute; top: 40px; right: 12px; background: rgba(245, 158, 11, 0.95); color: white; font-size: 9px; font-weight: 700; padding: 4px 8px; border-radius: 6px; max-width: 70%; text-align: center; line-height: 1.3; z-index: 2; }
+        .day-national-holiday { background: linear-gradient(135deg, rgba(133, 77, 14, 0.35) 0%, rgba(133, 77, 14, 0.15) 100%); border-color: rgba(202, 138, 4, 0.45); }
+        .holiday-badge { position: absolute; top: 40px; right: 12px; background: rgba(161, 98, 7, 0.95); color: #fef3c7; font-size: 9px; font-weight: 700; padding: 4px 8px; border-radius: 6px; max-width: 70%; text-align: center; line-height: 1.3; z-index: 2; }
 
         /* 補班日 */
-        .day-makeup { background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(99, 102, 241, 0.08) 100%); border: 2px dashed rgba(99, 102, 241, 0.5); }
-        .makeup-badge { background: rgba(99, 102, 241, 0.95); }
+        .day-makeup { background: linear-gradient(135deg, rgba(91, 141, 238, 0.15) 0%, rgba(91, 141, 238, 0.05) 100%); border: 2px dashed rgba(91, 141, 238, 0.45); }
+        .makeup-badge { background: rgba(59, 111, 212, 0.95); }
 
         /* 臨時假日 */
-        .day-custom-holiday { background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.08) 100%); border-color: rgba(16, 185, 129, 0.4); }
-        .custom-badge { background: rgba(16, 185, 129, 0.95); }
+        .day-custom-holiday { background: linear-gradient(135deg, rgba(34, 197, 94, 0.18) 0%, rgba(34, 197, 94, 0.07) 100%); border-color: rgba(34, 197, 94, 0.35); }
+        .custom-badge { background: rgba(22, 163, 74, 0.95); }
 
-        /* 有加班 */
+        /* 有加班 - 橙色，醒目但不刺眼 */
         .has-overtime {
-            background: linear-gradient(135deg, rgba(239, 68, 68, 0.3) 0%, rgba(239, 68, 68, 0.15) 100%) !important;
-            border: 2px solid rgba(239, 68, 68, 0.6) !important;
-            box-shadow: 0 0 24px rgba(239, 68, 68, 0.3) !important;
+            background: linear-gradient(135deg, rgba(249, 115, 22, 0.28) 0%, rgba(249, 115, 22, 0.12) 100%) !important;
+            border: 2px solid rgba(249, 115, 22, 0.65) !important;
+            box-shadow: 0 0 16px rgba(249, 115, 22, 0.2) !important;
         }
-        .has-overtime::before { background: radial-gradient(circle at center, rgba(239, 68, 68, 0.2) 0%, transparent 70%); opacity: 1; }
+        .has-overtime::before { background: radial-gradient(circle at center, rgba(249, 115, 22, 0.15) 0%, transparent 70%); opacity: 1; }
 
-        /* 有請假 */
-        .has-leave { background: linear-gradient(135deg, rgba(6, 182, 212, 0.25) 0%, rgba(6, 182, 212, 0.1) 100%) !important; border: 2px solid rgba(6, 182, 212, 0.5) !important; }
+        /* 有請假 - 天藍色 */
+        .has-leave { background: linear-gradient(135deg, rgba(56, 189, 248, 0.2) 0%, rgba(56, 189, 248, 0.08) 100%) !important; border: 2px solid rgba(56, 189, 248, 0.45) !important; }
 
-        /* 已報備 */
-        .day-is-reported { border-left: 6px solid var(--primary) !important; box-shadow: 0 0 32px rgba(99, 102, 241, 0.4) !important; }
-        .day-is-reported.has-overtime { background: linear-gradient(135deg, rgba(99, 102, 241, 0.25) 0%, rgba(239, 68, 68, 0.25) 100%) !important; }
+        /* 已申報 - 綠色左邊框，視覺上「已完成」感 */
+        .day-is-reported { border-left: 6px solid var(--reported-color) !important; box-shadow: 0 0 20px rgba(34, 197, 94, 0.25) !important; }
+        .day-is-reported.has-overtime { background: linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(249, 115, 22, 0.15) 100%) !important; }
 
-        .reported-indicator { position: absolute; top: 12px; right: 12px; background: var(--primary); color: white; font-size: 10px; font-weight: 700; padding: 4px 8px; border-radius: 6px; z-index: 2; box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4); }
+        .reported-indicator { position: absolute; top: 12px; right: 12px; background: var(--reported-color); color: white; font-size: 10px; font-weight: 700; padding: 4px 8px; border-radius: 6px; z-index: 2; box-shadow: 0 2px 8px rgba(34, 197, 94, 0.4); }
         .deferred-indicator { position: absolute; top: 38px; right: 12px; background: rgba(245, 158, 11, 0.95); color: white; font-size: 9px; font-weight: 700; padding: 3px 6px; border-radius: 5px; z-index: 2; }
-        .leave-indicator { position: absolute; bottom: 42px; left: 12px; background: rgba(6, 182, 212, 0.95); color: white; font-size: 10px; font-weight: 700; padding: 4px 8px; border-radius: 6px; z-index: 2; }
-        .day-ot-hours { color: #fb923c; font-weight: 900; text-align: right; margin-top: auto; font-size: 24px; text-shadow: 0 2px 8px rgba(251, 146, 60, 0.4); position: relative; z-index: 1; letter-spacing: -0.5px; }
+        .leave-indicator { position: absolute; bottom: 42px; left: 12px; background: rgba(56, 189, 248, 0.9); color: white; font-size: 10px; font-weight: 700; padding: 4px 8px; border-radius: 6px; z-index: 2; }
+        .day-ot-hours { color: var(--ot-color); font-weight: 900; text-align: right; margin-top: auto; font-size: 24px; text-shadow: 0 2px 8px rgba(249, 115, 22, 0.3); position: relative; z-index: 1; letter-spacing: -0.5px; }
 
         /* 側邊欄 */
         .sidebar { display: grid; gap: 24px; }
@@ -354,6 +362,7 @@
                 <button class="btn btn-ghost" onclick="toggleAnnualLeaveSettings()">🏖️ 年假設定</button>
                 <button class="btn btn-ghost" onclick="toggleSettings()">⚙️ 設定</button>
                 <button class="btn btn-ghost" onclick="showHolidayManager()">🎌 假日</button>
+                <button class="btn btn-success" onclick="generatePayslip()">📄 薪資條</button>
                 <button class="btn btn-primary" onclick="exportData()">💾 匯出</button>
                 <button class="btn btn-ghost" onclick="document.getElementById('importFile').click()">📥 匯入</button>
                 <input type="file" id="importFile" style="display: none;" onchange="importData(this)" accept=".json">
@@ -385,6 +394,43 @@
                 <div class="leave-stat-item">
                     <div class="leave-stat-label">使用率</div>
                     <div class="leave-stat-value" id="annualUsageRate" style="color: var(--warning);">0%</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 薪資試算卡片 -->
+        <div style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(6, 182, 212, 0.15) 100%); border: 2px solid rgba(16, 185, 129, 0.3); padding: 28px; border-radius: 20px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); margin-bottom: 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                <div style="font-size: 24px; font-weight: 900; display: flex; align-items: center; gap: 12px;">
+                    <span>💰</span>
+                    <span id="salaryMonth">本月薪資試算</span>
+                </div>
+                <button class="btn btn-success" onclick="generatePayslip()">📄 查看薪資條</button>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                <div class="leave-stat-item" style="background: rgba(16, 185, 129, 0.1);">
+                    <div class="leave-stat-label">底薪</div>
+                    <div class="leave-stat-value" id="salaryBase" style="color: var(--success);">$0</div>
+                </div>
+                <div class="leave-stat-item" style="background: rgba(245, 158, 11, 0.1);">
+                    <div class="leave-stat-label">加班費</div>
+                    <div class="leave-stat-value" id="salaryOT" style="color: var(--warning);">$0</div>
+                </div>
+                <div class="leave-stat-item" style="background: rgba(239, 68, 68, 0.1);">
+                    <div class="leave-stat-label">請假扣薪</div>
+                    <div class="leave-stat-value" id="salaryLeaveDeduct" style="color: var(--danger);">$0</div>
+                </div>
+                <div class="leave-stat-item" style="background: rgba(99, 102, 241, 0.1);">
+                    <div class="leave-stat-label">勞健保扣款</div>
+                    <div class="leave-stat-value" id="salaryInsurance" style="color: var(--primary);">$0</div>
+                </div>
+                <div class="leave-stat-item" style="background: rgba(236, 72, 153, 0.1);">
+                    <div class="leave-stat-label">其他扣款</div>
+                    <div class="leave-stat-value" id="salaryOtherDeduct" style="color: var(--secondary);">$0</div>
+                </div>
+                <div class="leave-stat-item" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(6, 182, 212, 0.2) 100%); border: 2px solid rgba(16, 185, 129, 0.5);">
+                    <div class="leave-stat-label">實領薪資</div>
+                    <div class="leave-stat-value" id="salaryNet" style="color: #10b981; font-size: 36px;">$0</div>
                 </div>
             </div>
         </div>
@@ -456,32 +502,32 @@
                     </h3>
                     <div class="legend-grid">
                         <div class="legend-item">
-                            <div class="legend-color" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.3) 0%, rgba(245, 158, 11, 0.15) 100%); border-color: rgba(245, 158, 11, 0.6);"></div>
+                            <div class="legend-color" style="background: linear-gradient(135deg, rgba(133, 77, 14, 0.35) 0%, rgba(133, 77, 14, 0.15) 100%); border-color: rgba(202, 138, 4, 0.45);"></div>
                             <span class="legend-text">國定假日</span>
                         </div>
                         <div class="legend-item">
-                            <div class="legend-color" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(99, 102, 241, 0.08) 100%); border: 2px dashed rgba(99, 102, 241, 0.5);"></div>
+                            <div class="legend-color" style="background: linear-gradient(135deg, rgba(91, 141, 238, 0.15) 0%, rgba(91, 141, 238, 0.05) 100%); border: 2px dashed rgba(91, 141, 238, 0.45);"></div>
                             <span class="legend-text">補班日</span>
                         </div>
                         <div class="legend-item">
-                            <div class="legend-color" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.08) 100%); border-color: rgba(16, 185, 129, 0.4);"></div>
+                            <div class="legend-color" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.18) 0%, rgba(34, 197, 94, 0.07) 100%); border-color: rgba(34, 197, 94, 0.35);"></div>
                             <span class="legend-text">臨時假日</span>
                         </div>
                         <div class="legend-item">
-                            <div class="legend-color" style="background: linear-gradient(135deg, rgba(236, 72, 153, 0.15) 0%, rgba(236, 72, 153, 0.05) 100%); border-color: rgba(236, 72, 153, 0.2);"></div>
+                            <div class="legend-color" style="background: linear-gradient(135deg, rgba(51, 65, 85, 0.6) 0%, rgba(51, 65, 85, 0.3) 100%); border-color: rgba(71, 85, 105, 0.4);"></div>
                             <span class="legend-text">週末休息</span>
                         </div>
                         <div class="legend-item">
-                            <div class="legend-color" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.3) 0%, rgba(239, 68, 68, 0.15) 100%); border: 2px solid rgba(239, 68, 68, 0.6);"></div>
-                            <span class="legend-text">有加班</span>
+                            <div class="legend-color" style="background: linear-gradient(135deg, rgba(249, 115, 22, 0.28) 0%, rgba(249, 115, 22, 0.12) 100%); border: 2px solid rgba(249, 115, 22, 0.65);"></div>
+                            <span class="legend-text">🟠 有加班（未申報）</span>
                         </div>
                         <div class="legend-item">
-                            <div class="legend-color" style="background: linear-gradient(135deg, rgba(6, 182, 212, 0.25) 0%, rgba(6, 182, 212, 0.1) 100%); border: 2px solid rgba(6, 182, 212, 0.5);"></div>
-                            <span class="legend-text">有請假</span>
+                            <div class="legend-color" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(249, 115, 22, 0.15) 100%); border-left: 6px solid #22c55e; border-right: 2px solid rgba(34, 197, 94, 0.3);"></div>
+                            <span class="legend-text">✅ 已申報加班</span>
                         </div>
                         <div class="legend-item">
-                            <div class="legend-color" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.25) 0%, rgba(245, 158, 11, 0.25) 100%); border-left: 6px solid var(--primary);"></div>
-                            <span class="legend-text">已報備</span>
+                            <div class="legend-color" style="background: linear-gradient(135deg, rgba(56, 189, 248, 0.2) 0%, rgba(56, 189, 248, 0.08) 100%); border: 2px solid rgba(56, 189, 248, 0.45);"></div>
+                            <span class="legend-text">🔵 有請假</span>
                         </div>
                     </div>
                 </div>
@@ -548,17 +594,28 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label">請假類型</label>
-                        <select id="leaveType" class="form-select">
+                        <select id="leaveType" class="form-select" onchange="updateLeavePreview()">
                             <option value="">無請假</option>
-                            <option value="annual">特休假</option>
-                            <option value="sick">病假</option>
-                            <option value="personal">事假</option>
+                            <option value="annual">特休假（不扣薪）</option>
+                            <option value="sick">病假（半年內30天不扣薪）</option>
+                            <option value="personal">事假（按時薪扣除）</option>
                             <option value="other">其他假別</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label class="form-label">請假時數</label>
-                        <input type="number" step="0.5" id="leaveDays" class="form-input" placeholder="例如：8 或 4">
+                        <input type="number" step="0.5" id="leaveDays" class="form-input" placeholder="例如：8 或 4" oninput="updateLeavePreview()">
+                    </div>
+                </div>
+
+                <div id="leavePreview" style="background: rgba(239, 68, 68, 0.1); padding: 16px; border-radius: 12px; margin-top: 16px; display: none;">
+                    <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 8px;">💸 請假扣薪試算</div>
+                    <div id="leaveBreakdown" style="font-size: 14px; color: var(--text-primary);"></div>
+                    <div style="border-top: 1px solid rgba(255,255,255,0.1); margin-top: 12px; padding-top: 12px;">
+                        <div style="display: flex; justify-content: space-between; font-weight: 700;">
+                            <span>扣薪金額：</span>
+                            <span id="leaveDeduction" style="color: var(--danger); font-size: 18px;">$0</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -616,31 +673,72 @@
 
     <!-- 系統設定彈窗 -->
     <div id="settingsModal" class="modal">
-        <div class="modal-content">
+        <div class="modal-content" style="max-width: 800px;">
             <div class="modal-header">
                 <h2 class="modal-title">系統設定</h2>
                 <button class="modal-close" onclick="toggleSettings()">×</button>
             </div>
 
-            <div class="form-group">
-                <label class="form-label">月薪（元）</label>
-                <input type="number" id="monthlySalary" class="form-input" placeholder="例如：30000" onchange="saveSettings()">
-            </div>
+            <div style="display: grid; gap: 24px;">
+                <!-- 基本薪資 -->
+                <div>
+                    <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 16px; color: var(--primary);">💰 基本薪資</h3>
+                    <div class="form-group">
+                        <label class="form-label">月薪（元）</label>
+                        <input type="number" id="monthlySalary" class="form-input" placeholder="例如：30000" onchange="saveSettings()">
+                    </div>
 
-            <div class="form-group">
-                <label class="form-label">時薪（自動計算）</label>
-                <input type="text" id="hourlyRate" class="form-input" readonly style="background: rgba(255,255,255,0.5); color: #64748b;">
-            </div>
+                    <div class="form-group">
+                        <label class="form-label">時薪（自動計算）</label>
+                        <input type="text" id="hourlyRate" class="form-input" readonly style="background: rgba(255,255,255,0.5); color: #64748b;">
+                    </div>
+                </div>
 
-            <div class="form-group">
-                <label class="form-label">目標加班費（元）</label>
-                <input type="number" id="targetPay" class="form-input" placeholder="例如：6000" onchange="calculateTargetHours()">
-            </div>
+                <!-- 勞健保費用 -->
+                <div>
+                    <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 16px; color: var(--danger);">🏥 勞健保扣款（個人負擔）</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">勞保費（元/月）</label>
+                            <input type="number" id="laborInsurance" class="form-input" placeholder="例如：594" onchange="saveSettings()">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">健保費（元/月）</label>
+                            <input type="number" id="healthInsurance" class="form-input" placeholder="例如：426" onchange="saveSettings()">
+                        </div>
+                    </div>
+                </div>
 
-            <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 16px; margin-top: 20px;">
-                <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 12px;">📊 建議加班時數組合</div>
-                <div id="targetHoursBreakdown" style="display: grid; gap: 12px; color: var(--text-secondary);">
-                    <!-- 動態生成 -->
+                <!-- 其他扣款 -->
+                <div>
+                    <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 16px; color: var(--warning);">💳 其他扣款</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">所得稅預扣（元/月）</label>
+                            <input type="number" id="incomeTax" class="form-input" placeholder="例如：0" onchange="saveSettings()">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">勞退自提6%</label>
+                            <input type="number" id="pensionSelf" class="form-input" placeholder="自動計算或手動輸入" onchange="saveSettings()">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">其他扣款（元/月）</label>
+                        <input type="number" id="otherDeductions" class="form-input" placeholder="例如：伙食費、借款等" onchange="saveSettings()">
+                    </div>
+                </div>
+
+                <!-- 加班目標 -->
+                <div>
+                    <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 16px; color: var(--success);">🎯 加班目標</h3>
+                    <div class="form-group">
+                        <label class="form-label">目標加班費（元）</label>
+                        <input type="number" id="targetPay" class="form-input" placeholder="例如：6000" onchange="calculateTargetHours()">
+                    </div>
+
+                    <div id="targetHoursBreakdown" style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 16px; margin-top: 20px;">
+                        <!-- 動態生成 -->
+                    </div>
                 </div>
             </div>
         </div>
@@ -734,6 +832,7 @@
         };
 
         function init() {
+        let sickLeaveDaysHalfYear = 0;
             loadData();
             if (!nationalHolidays || Object.keys(nationalHolidays).length === 0) {
                 nationalHolidays = {...DEFAULT_HOLIDAYS_2026};
@@ -767,8 +866,20 @@
 
             const monthlySalary = localStorage.getItem('monthlySalary');
             const targetPay = localStorage.getItem('targetPay');
+            const laborIns = localStorage.getItem('laborInsurance');
+            const healthIns = localStorage.getItem('healthInsurance');
+            const incomeTax = localStorage.getItem('incomeTax');
+            const pension = localStorage.getItem('pensionSelf');
+            const otherDeduct = localStorage.getItem('otherDeductions');
+            
             if (monthlySalary) document.getElementById('monthlySalary').value = monthlySalary;
             if (targetPay) document.getElementById('targetPay').value = targetPay;
+            if (laborIns) document.getElementById('laborInsurance').value = laborIns;
+            if (healthIns) document.getElementById('healthInsurance').value = healthIns;
+            if (incomeTax) document.getElementById('incomeTax').value = incomeTax;
+            if (pension) document.getElementById('pensionSelf').value = pension;
+            if (otherDeduct) document.getElementById('otherDeductions').value = otherDeduct;
+            
             calculateHourlyRate();
             calculateTargetHours();
         }
@@ -776,8 +887,20 @@
         function saveSettings() {
             const monthlySalary = document.getElementById('monthlySalary').value;
             const targetPayInput = document.getElementById('targetPay').value;
+            const laborIns = document.getElementById('laborInsurance').value;
+            const healthIns = document.getElementById('healthInsurance').value;
+            const incomeTax = document.getElementById('incomeTax').value;
+            const pension = document.getElementById('pensionSelf').value;
+            const otherDeduct = document.getElementById('otherDeductions').value;
+            
             if (monthlySalary) localStorage.setItem('monthlySalary', monthlySalary);
             if (targetPayInput) localStorage.setItem('targetPay', targetPayInput);
+            if (laborIns) localStorage.setItem('laborInsurance', laborIns);
+            if (healthIns) localStorage.setItem('healthInsurance', healthIns);
+            if (incomeTax) localStorage.setItem('incomeTax', incomeTax);
+            if (pension) localStorage.setItem('pensionSelf', pension);
+            if (otherDeduct) localStorage.setItem('otherDeductions', otherDeduct);
+            
             calculateHourlyRate();
             calculateTargetHours();
             updateStats();
@@ -1231,6 +1354,7 @@
                 </div>
             `;
             document.getElementById('statsGrid').innerHTML = detailStatsHTML;
+            updateSalaryCalculation();
         }
 
         function updateAnnualLeaveDisplay() {
@@ -1591,6 +1715,333 @@
             return `${year}-${month}-${day}`;
         }
 
+        // 病假累計天數追蹤（半年內）
+        let sickLeaveDaysHalfYear = 0;
+
+        // 更新請假扣薪預覽
+        function updateLeavePreview() {
+            const leaveType = document.getElementById('leaveType').value;
+            const leaveHours = parseFloat(document.getElementById('leaveDays').value) || 0;
+            const preview = document.getElementById('leavePreview');
+            
+            if (!leaveType || leaveHours <= 0 || !selectedDay) {
+                preview.style.display = 'none';
+                return;
+            }
+            
+            const monthlySalary = parseFloat(document.getElementById('monthlySalary').value) || 0;
+            if (monthlySalary === 0) {
+                preview.style.display = 'none';
+                return;
+            }
+            
+            const hourlyRate = monthlySalary / 30 / 8;
+            let deduction = 0;
+            let explanation = '';
+            
+            if (leaveType === 'annual') {
+                explanation = '特休假不扣薪';
+                deduction = 0;
+            } else if (leaveType === 'personal') {
+                explanation = `事假按時薪扣除：${leaveHours}h × $${Math.round(hourlyRate)}`;
+                deduction = leaveHours * hourlyRate;
+            } else if (leaveType === 'sick') {
+                const leaveDays = leaveHours / 8;
+                if (sickLeaveDaysHalfYear + leaveDays <= 30) {
+                    explanation = `病假半年內${(sickLeaveDaysHalfYear + leaveDays).toFixed(1)}天（≤30天不扣薪）`;
+                    deduction = 0;
+                } else {
+                    const unpaidDays = (sickLeaveDaysHalfYear + leaveDays) - 30;
+                    const unpaidHours = unpaidDays * 8;
+                    explanation = `病假超過30天，超過部分半薪：${unpaidHours.toFixed(1)}h × $${Math.round(hourlyRate / 2)}`;
+                    deduction = unpaidHours * hourlyRate * 0.5;
+                }
+            } else {
+                explanation = '其他假別請自行確認扣薪規則';
+                deduction = 0;
+            }
+            
+            document.getElementById('leaveBreakdown').innerHTML = `<div>${explanation}</div>`;
+            document.getElementById('leaveDeduction').textContent = `-$${Math.round(deduction).toLocaleString()}`;
+            preview.style.display = 'block';
+        }
+
+        // 計算請假扣薪
+        function calculateLeaveDeduction(leaveType, leaveHours) {
+            const monthlySalary = parseFloat(document.getElementById('monthlySalary').value) || 0;
+            if (monthlySalary === 0) return 0;
+            
+            const hourlyRate = monthlySalary / 30 / 8;
+            let deduction = 0;
+            
+            if (leaveType === 'personal') {
+                deduction = leaveHours * hourlyRate;
+            } else if (leaveType === 'sick') {
+                const leaveDays = leaveHours / 8;
+                if (sickLeaveDaysHalfYear + leaveDays > 30) {
+                    const unpaidDays = (sickLeaveDaysHalfYear + leaveDays) - 30;
+                    const unpaidHours = unpaidDays * 8;
+                    deduction = unpaidHours * hourlyRate * 0.5;
+                }
+            }
+            
+            return Math.round(deduction);
+        }
+
+        // 更新薪資試算
+        function updateSalaryCalculation() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            const monthKey = getCurrentMonthKey();
+            
+            // 底薪
+            const baseSalary = parseFloat(document.getElementById('monthlySalary').value) || 0;
+            
+            // 加班費（本月實領，不含延計）
+            let overtimePay = 0;
+            const cycle = monthlyCycles[monthKey];
+            
+            if (cycle) {
+                const startDate = new Date(cycle.startDate);
+                const endDate = new Date(cycle.endDate);
+                
+                for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+                    const dateStr = formatDateStr(d);
+                    const record = overtimeData[dateStr];
+                    
+                    if (record && !record.deferred) {
+                        overtimePay += calculateOTPay(record.hours);
+                    }
+                }
+            }
+            
+            // 請假扣薪
+            let leaveDeduction = 0;
+            sickLeaveDaysHalfYear = 0;
+            
+            if (cycle) {
+                const startDate = new Date(cycle.startDate);
+                const endDate = new Date(cycle.endDate);
+                
+                for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+                    const dateStr = formatDateStr(d);
+                    const leave = leaveData[dateStr];
+                    
+                    if (leave && leave.type && leave.days) {
+                        leaveDeduction += calculateLeaveDeduction(leave.type, leave.days);
+                        if (leave.type === 'sick') {
+                            sickLeaveDaysHalfYear += leave.days / 8;
+                        }
+                    }
+                }
+            }
+            
+            // 勞健保扣款
+            const laborIns = parseFloat(document.getElementById('laborInsurance').value) || 0;
+            const healthIns = parseFloat(document.getElementById('healthInsurance').value) || 0;
+            const insuranceTotal = laborIns + healthIns;
+            
+            // 其他扣款
+            const incomeTax = parseFloat(document.getElementById('incomeTax').value) || 0;
+            const pension = parseFloat(document.getElementById('pensionSelf').value) || 0;
+            const otherDeduct = parseFloat(document.getElementById('otherDeductions').value) || 0;
+            const otherTotal = incomeTax + pension + otherDeduct;
+            
+            // 實領薪資
+            const netSalary = baseSalary + overtimePay - leaveDeduction - insuranceTotal - otherTotal;
+            
+            // 更新顯示
+            document.getElementById('salaryBase').textContent = `$${baseSalary.toLocaleString()}`;
+            document.getElementById('salaryOT').textContent = `$${overtimePay.toLocaleString()}`;
+            document.getElementById('salaryLeaveDeduct').textContent = `-$${leaveDeduction.toLocaleString()}`;
+            document.getElementById('salaryInsurance').textContent = `-$${insuranceTotal.toLocaleString()}`;
+            document.getElementById('salaryOtherDeduct').textContent = `-$${otherTotal.toLocaleString()}`;
+            document.getElementById('salaryNet').textContent = `$${netSalary.toLocaleString()}`;
+        }
+
+        // 生成薪資條
+        function generatePayslip() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth() + 1;
+            const monthKey = getCurrentMonthKey();
+            const cycle = monthlyCycles[monthKey];
+            
+            if (!cycle) {
+                alert('請先設定考勤週期！');
+                return;
+            }
+            
+            // 計算所有數據
+            const baseSalary = parseFloat(document.getElementById('monthlySalary').value) || 0;
+            const hourlyRate = baseSalary / 30 / 8;
+            
+            let overtimePay = 0;
+            let overtimeHours = 0;
+            let deferredPay = 0;
+            
+            const startDate = new Date(cycle.startDate);
+            const endDate = new Date(cycle.endDate);
+            
+            for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+                const dateStr = formatDateStr(d);
+                const record = overtimeData[dateStr];
+                
+                if (record) {
+                    const pay = calculateOTPay(record.hours);
+                    overtimeHours += record.hours;
+                    if (record.deferred) {
+                        deferredPay += pay;
+                    } else {
+                        overtimePay += pay;
+                    }
+                }
+            }
+            
+            let leaveDeduction = 0;
+            let leaveHours = 0;
+            sickLeaveDaysHalfYear = 0;
+            
+            for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+                const dateStr = formatDateStr(d);
+                const leave = leaveData[dateStr];
+                
+                if (leave && leave.type && leave.days) {
+                    leaveHours += leave.days;
+                    leaveDeduction += calculateLeaveDeduction(leave.type, leave.days);
+                    if (leave.type === 'sick') {
+                        sickLeaveDaysHalfYear += leave.days / 8;
+                    }
+                }
+            }
+            
+            const laborIns = parseFloat(document.getElementById('laborInsurance').value) || 0;
+            const healthIns = parseFloat(document.getElementById('healthInsurance').value) || 0;
+            const incomeTax = parseFloat(document.getElementById('incomeTax').value) || 0;
+            const pension = parseFloat(document.getElementById('pensionSelf').value) || 0;
+            const otherDeduct = parseFloat(document.getElementById('otherDeductions').value) || 0;
+            
+            const totalIncome = baseSalary + overtimePay;
+            const totalDeduction = leaveDeduction + laborIns + healthIns + incomeTax + pension + otherDeduct;
+            const netSalary = totalIncome - totalDeduction;
+            
+            // 生成HTML薪資條
+            const payslipHTML = `
+                <div style="text-align: center; margin-bottom: 30px; border-bottom: 3px solid #6366f1; padding-bottom: 20px;">
+                    <h1 style="font-size: 28px; font-weight: 900; color: #1f2937; margin-bottom: 10px;">薪資明細表</h1>
+                    <p style="font-size: 16px; color: #64748b;">${year}年 ${month}月份</p>
+                    <p style="font-size: 14px; color: #64748b;">發薪期間：${cycle.startDate} ~ ${cycle.endDate}</p>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px;">
+                    <!-- 收入項目 -->
+                    <div>
+                        <h3 style="font-size: 18px; font-weight: 700; color: #10b981; margin-bottom: 15px; border-bottom: 2px solid #10b981; padding-bottom: 8px;">💰 收入項目</h3>
+                        <table style="width: 100%; font-size: 14px;">
+                            <tr style="border-bottom: 1px solid #e5e7eb;">
+                                <td style="padding: 10px 0; color: #64748b;">本薪</td>
+                                <td style="padding: 10px 0; text-align: right; font-weight: 600;">$${baseSalary.toLocaleString()}</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #e5e7eb;">
+                                <td style="padding: 10px 0; color: #64748b;">加班費（${overtimeHours.toFixed(1)}h）</td>
+                                <td style="padding: 10px 0; text-align: right; font-weight: 600;">$${overtimePay.toLocaleString()}</td>
+                            </tr>
+                            ${deferredPay > 0 ? `
+                            <tr style="border-bottom: 1px solid #e5e7eb;">
+                                <td style="padding: 10px 0; color: #f59e0b;">延至下月計薪</td>
+                                <td style="padding: 10px 0; text-align: right; font-weight: 600; color: #f59e0b;">$${deferredPay.toLocaleString()}</td>
+                            </tr>
+                            ` : ''}
+                            <tr style="background: #f0fdf4; font-weight: 700;">
+                                <td style="padding: 12px 0; color: #10b981;">應發金額</td>
+                                <td style="padding: 12px 0; text-align: right; color: #10b981; font-size: 16px;">$${totalIncome.toLocaleString()}</td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <!-- 扣款項目 -->
+                    <div>
+                        <h3 style="font-size: 18px; font-weight: 700; color: #ef4444; margin-bottom: 15px; border-bottom: 2px solid #ef4444; padding-bottom: 8px;">💸 扣款項目</h3>
+                        <table style="width: 100%; font-size: 14px;">
+                            ${leaveDeduction > 0 ? `
+                            <tr style="border-bottom: 1px solid #e5e7eb;">
+                                <td style="padding: 10px 0; color: #64748b;">請假扣薪（${leaveHours.toFixed(1)}h）</td>
+                                <td style="padding: 10px 0; text-align: right; font-weight: 600;">$${leaveDeduction.toLocaleString()}</td>
+                            </tr>
+                            ` : ''}
+                            ${laborIns > 0 ? `
+                            <tr style="border-bottom: 1px solid #e5e7eb;">
+                                <td style="padding: 10px 0; color: #64748b;">勞保費</td>
+                                <td style="padding: 10px 0; text-align: right; font-weight: 600;">$${laborIns.toLocaleString()}</td>
+                            </tr>
+                            ` : ''}
+                            ${healthIns > 0 ? `
+                            <tr style="border-bottom: 1px solid #e5e7eb;">
+                                <td style="padding: 10px 0; color: #64748b;">健保費</td>
+                                <td style="padding: 10px 0; text-align: right; font-weight: 600;">$${healthIns.toLocaleString()}</td>
+                            </tr>
+                            ` : ''}
+                            ${incomeTax > 0 ? `
+                            <tr style="border-bottom: 1px solid #e5e7eb;">
+                                <td style="padding: 10px 0; color: #64748b;">所得稅</td>
+                                <td style="padding: 10px 0; text-align: right; font-weight: 600;">$${incomeTax.toLocaleString()}</td>
+                            </tr>
+                            ` : ''}
+                            ${pension > 0 ? `
+                            <tr style="border-bottom: 1px solid #e5e7eb;">
+                                <td style="padding: 10px 0; color: #64748b;">勞退自提6%</td>
+                                <td style="padding: 10px 0; text-align: right; font-weight: 600;">$${pension.toLocaleString()}</td>
+                            </tr>
+                            ` : ''}
+                            ${otherDeduct > 0 ? `
+                            <tr style="border-bottom: 1px solid #e5e7eb;">
+                                <td style="padding: 10px 0; color: #64748b;">其他扣款</td>
+                                <td style="padding: 10px 0; text-align: right; font-weight: 600;">$${otherDeduct.toLocaleString()}</td>
+                            </tr>
+                            ` : ''}
+                            <tr style="background: #fef2f2; font-weight: 700;">
+                                <td style="padding: 12px 0; color: #ef4444;">扣款總計</td>
+                                <td style="padding: 12px 0; text-align: right; color: #ef4444; font-size: 16px;">$${totalDeduction.toLocaleString()}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 實領薪資 -->
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; border-radius: 12px; text-align: center; margin-top: 20px;">
+                    <p style="font-size: 16px; margin-bottom: 10px; opacity: 0.9;">本月實領薪資</p>
+                    <p style="font-size: 42px; font-weight: 900; letter-spacing: -1px;">$${netSalary.toLocaleString()}</p>
+                </div>
+
+                <div style="margin-top: 30px; padding-top: 20px; border-top: 2px dashed #e5e7eb; font-size: 12px; color: #9ca3af; text-align: center;">
+                    <p>本薪資條由系統自動生成於 ${new Date().toLocaleDateString('zh-TW')}</p>
+                    <p style="margin-top: 5px;">此為試算參考，實際金額以公司核發為準</p>
+                </div>
+            `;
+            
+            document.getElementById('payslipContent').innerHTML = payslipHTML;
+            document.getElementById('payslipModal').classList.add('active');
+        }
+
+        function closePayslip() {
+            document.getElementById('payslipModal').classList.remove('active');
+        }
+
+        function downloadPayslipPDF() {
+            const element = document.getElementById('payslipContent');
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth() + 1;
+            
+            const opt = {
+                margin: 10,
+                filename: `薪資條_${year}年${month}月.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            
+            html2pdf().set(opt).from(element).save();
+        }
+
         function formatDateForInput(date) {
             return formatDateStr(date);
         }
@@ -1599,3 +2050,25 @@
     </script>
 </body>
 </html>
+
+    <!-- 薪資條彈窗 -->
+    <div id="payslipModal" class="modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h2 class="modal-title">📄 薪資條</h2>
+                <button class="modal-close" onclick="closePayslip()">×</button>
+            </div>
+
+            <div id="payslipContent" style="background: white; color: #1f2937; padding: 40px; border-radius: 16px;">
+                <!-- 動態生成薪資條內容 -->
+            </div>
+
+            <div class="btn-group" style="margin-top: 24px;">
+                <button class="btn btn-primary btn-full" onclick="downloadPayslipPDF()">💾 下載PDF</button>
+                <button class="btn btn-ghost" onclick="closePayslip()">關閉</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script>
